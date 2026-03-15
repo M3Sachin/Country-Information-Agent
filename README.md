@@ -20,13 +20,14 @@ uvicorn country_info_agent.api.main:app --reload --log-level info
 python -m country_info_agent.cli.main
 ```
 
-## API
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | Root |
 | GET | `/health` | Health check |
 | POST | `/query` | Process query |
+
+### Example
 
 ```bash
 curl -X POST http://localhost:8000/query \
@@ -34,13 +35,32 @@ curl -X POST http://localhost:8000/query \
   -d '{"query": "What is the population of Germany?"}'
 ```
 
-## Config (.env)
+### Response
 
-| Variable | Default |
-|----------|---------|
-| `GOOGLE_API_KEY` | Required |
-| `GEMINI_MODEL` | gemini-1.5-flash |
-| `API_BASE_URL` | https://restcountries.com/v3.1 |
-| `API_TIMEOUT` | 10 |
-| `MAX_RETRIES` | 3 |
-| `LOG_LEVEL` | INFO |
+```json
+{
+  "answer": "Germany has a population of approximately 83.2 million.",
+  "country": "Germany",
+  "fields": ["population"]
+}
+```
+
+## Configuration (.env)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GOOGLE_API_KEY` | Required | Google API key for Gemini |
+| `GEMINI_MODEL` | gemini-1.5-flash | Gemini model name |
+| `API_BASE_URL` | https://restcountries.com/v3.1 | REST Countries API |
+| `API_TIMEOUT` | 10 | Request timeout (seconds) |
+| `MAX_RETRIES` | 3 | Retry attempts |
+| `LOG_LEVEL` | INFO | Logging level |
+
+## Deploy to Render
+
+See `render.yaml` for deployment configuration.
+
+1. Push to GitHub
+2. Connect to render.com
+3. Add `GOOGLE_API_KEY` env var
+4. Deploy for free
