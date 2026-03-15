@@ -19,8 +19,8 @@ class Settings(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    google_api_key: Optional[str] = Field(
-        default=None, description="Google API key for LLM"
+    puter_auth_token: Optional[str] = Field(
+        default=None, description="Puter auth token for free Gemini API"
     )
     gemini_model: str = Field(
         default="gemini-2.5-flash", description="Gemini model name"
@@ -71,8 +71,8 @@ class Settings(BaseModel):
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings(
-        google_api_key=os.getenv("GOOGLE_API_KEY"),
-        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+        puter_auth_token=os.getenv("PUTER_AUTH_TOKEN"),
+        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
         api_timeout=int(os.getenv("API_TIMEOUT", "10")),
         max_retries=int(os.getenv("MAX_RETRIES", "3")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),

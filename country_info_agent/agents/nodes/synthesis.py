@@ -3,10 +3,10 @@ Synthesis node for Country Info Agent.
 """
 
 import logging
-
-from langchain_google_genai import ChatGoogleGenerativeAI
+import asyncio
 
 from country_info_agent.api.client import CountryAPIClient
+from country_info_agent.api.llm_client import PuterLLMClient
 from country_info_agent.agents.state import AgentState
 from country_info_agent.config import get_settings
 
@@ -52,37 +52,48 @@ def synthesis_node(state: AgentState) -> AgentState:
         if c.subregion:
             data_str += f" ({c.subregion})"
         data_str += "\n"
-        data_str += f"Languages: {', '.join(c.languages.values()) if c.languages else 'N/A'}\n"
-        currencies = [curr.get("name") for curr in c.currencies.values()] if c.currencies else []
+        data_str += (
+            f"Languages: {', '.join(c.languages.values()) if c.languages else 'N/A'}\n"
+        )
+        currencies = (
+            [curr.get("name") for curr in c.currencies.values()] if c.currencies else []
+        )
         data_str += f"Currencies: {', '.join(currencies) if currencies else 'N/A'}\n"
         data_str += f"Flag: {c.flags.get('png', 'N/A')}\n"
         data_str += "---\n"
 
-    if not settings.google_api_key:
+    if not settings.puter_auth_token:
         return {**state, "answer": _format_basic_answer(parsed_data[0])}
 
     try:
-        llm = ChatGoogleGenerativeAI(
-            model=settings.gemini_model,
-            temperature=0.3,
-            google_api_key=settings.google_api_key,
-        )
+        llm_client = PuterLLMClient()
 
         prompt = f"""You are a helpful assistant that answers questions about countries.
-        Based on the following data from the REST Countries API and the original user query, provide a concise and accurate answer.
+Based on the following data from the REST Countries API and the original user query, provide a concise and accurate answer.
 
-        User Query: {state["user_query"]}
+User Query: {state["user_query"]}
 
-        Data:
-        {data_str}
+Data:
+{data_str}
 
-        Answer the user's question directly and concisely. If multiple countries were returned (e.g., partial name match),
-        mention the most relevant one or clarify. Format numbers appropriately (e.g., 83 million for population).
-        """
+Answer the user's question directly and concisely. If multiple countries were returned (e.g., partial name match),
+mention the most relevant one or clarify. Format numbers appropriately (e.g., 83 million for population)."""
 
-        response = llm.invoke(prompt)
+        answer = asyncio.run(
+            llm_client.chat(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful assistant that answers questions about countries.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                model=settings.gemini_model,
+                temperature=0.3,
+            )
+        )
 
-        return {**state, "answer": response.content}
+        return {**state, "answer": answer}
 
     except Exception as e:
         logger.error(f"LLM synthesis failed: {e}", exc_info=True)
