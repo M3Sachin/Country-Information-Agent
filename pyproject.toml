@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "country-info-agent"
+version = "1.0.0"
+description = "AI agent that answers questions about countries using REST Countries API"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+dependencies = [
+    "langgraph>=0.0.20",
+    "langchain-google-genai>=0.0.5",
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+]
+
+[project.scripts]
+country-agent = "country_info_agent.cli.main:main"
+country-agent-api = "country_info_agent.api.main:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["country_info_agent*"]

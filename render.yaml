@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: country-info-agent
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn country_info_agent.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: LOG_LEVEL
+        value: INFO
