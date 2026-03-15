@@ -19,15 +19,24 @@ class Settings(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    google_api_key: Optional[str] = Field(default=None, description="Google API key for LLM")
-    gemini_model: str = Field(default="gemini-1.5-flash", description="Gemini model name")
+    google_api_key: Optional[str] = Field(
+        default=None, description="Google API key for LLM"
+    )
+    gemini_model: str = Field(
+        default="gemini-2.0-flash", description="Gemini model name"
+    )
     api_timeout: int = Field(default=10, description="API request timeout in seconds")
-    max_retries: int = Field(default=3, description="Maximum number of retries for API calls")
+    max_retries: int = Field(
+        default=3, description="Maximum number of retries for API calls"
+    )
     log_level: str = Field(default="INFO", description="Logging level")
     api_base_url: str = Field(
-        default="https://restcountries.com/v3.1", description="REST Countries API base URL"
+        default="https://restcountries.com/v3.1",
+        description="REST Countries API base URL",
     )
-    rate_limit_delay: float = Field(default=0.1, description="Rate limit delay in seconds")
+    rate_limit_delay: float = Field(
+        default=0.1, description="Rate limit delay in seconds"
+    )
     pool_connections: int = Field(default=10, description="HTTP pool connections")
     pool_maxsize: int = Field(default=20, description="HTTP pool max size")
 
@@ -63,7 +72,7 @@ def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings(
         google_api_key=os.getenv("GOOGLE_API_KEY"),
-        gemini_model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
+        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
         api_timeout=int(os.getenv("API_TIMEOUT", "10")),
         max_retries=int(os.getenv("MAX_RETRIES", "3")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
