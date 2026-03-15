@@ -50,7 +50,7 @@ curl -X POST http://localhost:8000/query \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GOOGLE_API_KEY` | Required | Google API key for Gemini |
-| `GEMINI_MODEL` | gemini-1.5-flash | Gemini model name |
+| `GEMINI_MODEL` | gemini-2.5-flash | Gemini model name |
 | `API_BASE_URL` | https://restcountries.com/v3.1 | REST Countries API |
 | `API_TIMEOUT` | 10 | Request timeout (seconds) |
 | `MAX_RETRIES` | 3 | Retry attempts |
