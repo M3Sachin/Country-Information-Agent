@@ -59,6 +59,11 @@ class HealthResponse(BaseModel):
     config: dict
 
 
+@app.get("/")
+async def root():
+    return {"message": "Country Info Agent API", "docs": "/docs"}
+
+
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health():
     """Health check endpoint."""
