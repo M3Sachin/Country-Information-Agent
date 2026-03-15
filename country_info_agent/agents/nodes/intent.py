@@ -3,8 +3,6 @@ Intent extraction node for Country Info Agent.
 """
 
 import logging
-import json
-import asyncio
 
 from country_info_agent.agents.state import AgentState
 from country_info_agent.config import get_settings
@@ -48,13 +46,11 @@ Return a valid JSON with:
 - country_name: The name of the country
 - fields: List of information requested (e.g., population, capital, currency, language, area, region)"""
 
-        result = asyncio.run(
-            client.chat_with_structured_output(
-                system_prompt="You are a helpful assistant that extracts information from user queries. Always respond with valid JSON.",
-                user_prompt=prompt,
-                model=settings.gemini_model,
-                temperature=0,
-            )
+        result = client.chat_with_structured_output(
+            system_prompt="You are a helpful assistant that extracts information from user queries. Always respond with valid JSON.",
+            user_prompt=prompt,
+            model=settings.gemini_model,
+            temperature=0,
         )
 
         country_name = result.get("country_name", "").strip()

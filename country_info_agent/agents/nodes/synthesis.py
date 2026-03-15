@@ -3,7 +3,6 @@ Synthesis node for Country Info Agent.
 """
 
 import logging
-import asyncio
 
 from country_info_agent.api.client import CountryAPIClient
 from country_info_agent.api.llm_client import PuterLLMClient
@@ -58,6 +57,7 @@ def synthesis_node(state: AgentState) -> AgentState:
         currencies = (
             [curr.get("name") for curr in c.currencies.values()] if c.currencies else []
         )
+        currencies = [c for c in currencies if c]  # Filter None values
         data_str += f"Currencies: {', '.join(currencies) if currencies else 'N/A'}\n"
         data_str += f"Flag: {c.flags.get('png', 'N/A')}\n"
         data_str += "---\n"
@@ -79,18 +79,16 @@ Data:
 Answer the user's question directly and concisely. If multiple countries were returned (e.g., partial name match),
 mention the most relevant one or clarify. Format numbers appropriately (e.g., 83 million for population)."""
 
-        answer = asyncio.run(
-            llm_client.chat(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant that answers questions about countries.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                model=settings.gemini_model,
-                temperature=0.3,
-            )
+        answer = llm_client.chat(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that answers questions about countries.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            model=settings.gemini_model,
+            temperature=0.3,
         )
 
         return {**state, "answer": answer}
@@ -111,6 +109,7 @@ def _format_basic_answer(country) -> str:
 
     if country.currencies:
         curr_names = [c.get("name") for c in country.currencies.values()]
+        curr_names = [c for c in curr_names if c]  # Filter None
         parts.append(f"and uses {', '.join(curr_names)} as currency")
 
     return ". ".join(parts) + "."

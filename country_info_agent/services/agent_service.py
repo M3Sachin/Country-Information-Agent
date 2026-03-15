@@ -30,7 +30,7 @@ class AgentService:
         settings = get_settings()
         health = {
             "status": "healthy",
-            "api_key_configured": bool(settings.google_api_key),
+            "api_key_configured": bool(settings.puter_auth_token),
             "config": {
                 "api_timeout": settings.api_timeout,
                 "max_retries": settings.max_retries,
@@ -38,9 +38,9 @@ class AgentService:
             },
         }
 
-        if not settings.google_api_key:
+        if not settings.puter_auth_token:
             health["status"] = "degraded"
-            health["warning"] = "GOOGLE_API_KEY not configured"
+            health["warning"] = "PUTER_AUTH_TOKEN not configured"
 
         return health
 

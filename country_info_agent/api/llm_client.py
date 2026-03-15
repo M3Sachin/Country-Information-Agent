@@ -3,9 +3,11 @@ LLM client using Puter's OpenAI-compatible API.
 """
 
 import logging
+import json
+import re
 from typing import Optional, List, Dict, Any
 
-from openai import AsyncOpenAI
+from openai import OpenAI
 
 from country_info_agent.config import get_settings
 
@@ -19,19 +21,28 @@ class PuterLLMClient:
 
     def __init__(self):
         self.settings = get_settings()
-        self._client: Optional[AsyncOpenAI] = None
+        self._client: Optional[OpenAI] = None
 
     @property
-    def client(self) -> AsyncOpenAI:
+    def client(self) -> OpenAI:
         """Get or create OpenAI client."""
         if self._client is None:
-            self._client = AsyncOpenAI(
+            self._client = OpenAI(
                 base_url=self.BASE_URL,
                 api_key=self.settings.puter_auth_token or "dummy",
             )
         return self._client
 
-    async def chat(
+    def _clean_json_response(self, content: str) -> str:
+        """Clean markdown code blocks from JSON response."""
+        content = content.strip()
+        # Remove markdown code blocks
+        content = re.sub(r"^```json\s*", "", content)
+        content = re.sub(r"^```\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+        return content
+
+    def chat(
         self,
         messages: List[Dict[str, str]],
         model: Optional[str] = None,
@@ -41,17 +52,20 @@ class PuterLLMClient:
         model = model or self.settings.gemini_model
 
         try:
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,
             )
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            if not content:
+                raise ValueError("Empty response from Puter API")
+            return content
         except Exception as e:
             logger.error(f"Puter API error: {e}")
             raise
 
-    async def chat_with_structured_output(
+    def chat_with_structured_output(
         self,
         system_prompt: str,
         user_prompt: str,
@@ -70,15 +84,21 @@ class PuterLLMClient:
         ]
 
         try:
-            response = await self.client.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,
                 response_format={"type": "json_object"},
             )
-            import json
 
             content = response.choices[0].message.content
+
+            if not content:
+                raise ValueError("Empty response from Puter API")
+
+            # Clean markdown code blocks
+            content = self._clean_json_response(content)
+
             return json.loads(content)
         except Exception as e:
             logger.error(f"Puter API error: {e}")
