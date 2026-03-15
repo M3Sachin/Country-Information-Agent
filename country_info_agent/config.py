@@ -23,7 +23,7 @@ class Settings(BaseModel):
         default=None, description="Google API key for LLM"
     )
     gemini_model: str = Field(
-        default="gemini-2.0-flash", description="Gemini model name"
+        default="gemini-2.5-flash", description="Gemini model name"
     )
     api_timeout: int = Field(default=10, description="API request timeout in seconds")
     max_retries: int = Field(
